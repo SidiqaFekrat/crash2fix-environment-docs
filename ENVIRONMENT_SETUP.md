@@ -92,3 +92,19 @@ sudo apt-get install libstdc++-12-dev
 ```
 This installs the missing headers under '/usr/include/c++/12/'.
 After installation, `configure`'s "checking for new enough STL headers from libstdc++" check passes.
+
+## Saved Build Cache and CLOBBER Staleness
+
+Each commit is build once and its compiled objdir is saved under that commit's hash, so it can be restored later instead of rebuilding from scratch every time a test needs to run.
+
+Even when restoring the correct build for the commit currently checked out, the build system's manifest freshness check doesn't recognize a restored objdir as coming from a normal, continuous build session - it flags the manifest as stale regardless:
+
+```
+backend.TestManifestBackend is out of date with respect to .../moz.build
+The build system was unable to install tests because the CLOBBER file has been updated.
+```
+Fix:
+```bash
+touch objdir-fullBuild/CLOBBER
+```
+
