@@ -1,4 +1,4 @@
-# jit-test - Requirements & How to Run
+# jit-test - Requirements 
 
 **Official docs:** https://firefox-source-docs.mozilla.org/js/test.html
 
@@ -37,23 +37,6 @@ role when stdout is empty (`fixing` → `"fail"`, `parent` → `"pass"`),
 producing exactly backwards results for a test that never actually
 ran on either side.
 
-```bash
-ls -la objdir-fullBuild/dist/bin/js
-
-# 3. if PARENT role, patch the test file from the fixing commit first
-hg cat -r <fixing_commit_hash> js/src/jit-test/tests/<relative_path> > js/src/jit-test/tests/<relative_path>
-
-# 4. run — strip the "js/src/jit-test/tests/" prefix from the path
-MOZCONFIG=/data/FaultLocalizationIndustry/mozilla-central/mozconfig RUSTUP_TOOLCHAIN=stable DISPLAY=:99 \
-  ./mach jit-test <relative_path> 2>&1 | tee /data/FaultLocalizationIndustry/manual_test_logs/<bugid>_<role>_test.log
-
-# 5. if PARENT, check before reverting
-hg status js/src/jit-test/tests/<relative_path>
-# "M"           -> hg revert -r . <path>
-# "not managed" -> rm <path>
-
-mv objdir-fullBuild /data/FaultLocalizationIndustry/saved_builds/<commit_hash>
-```
 ## Useful Flags (from Mozilla's docs)
 
 - `--jitflags=<bundle>` — test under specific JIT configurations (`all`, `interp`, `none`, etc.)
