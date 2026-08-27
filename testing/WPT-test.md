@@ -1,4 +1,4 @@
-# web-platform-tests (WPT) — Requirements & How to Run
+# web-platform-tests (WPT) — Requirements 
 
 **Official docs:** https://firefox-source-docs.mozilla.org/web-platform/index.html
 
@@ -43,26 +43,6 @@ A WPT crashtest passing means only one thing: the page loaded and
 rendered without crashing the browser — no pixel comparison, no JS
 assertions. `TEST_END: PASS` = page survived; `TEST_END: CRASH` =
 page crashed the browser.
-
-## How to Run
-```bash
-# 1. reapply typing_extensions patch — every time, after every hg update
-cp $(find ~/.mozbuild/srcdirs/*/_virtualenvs/wpt -name "typing_extensions.py" -path "*/site-packages/*") \
-   testing/web-platform/tests/tools/third_party/typing_extensions/src/typing_extensions.py
-
-# 2. if PARENT role, patch the test file from the fixing commit first
-hg cat -r <fixing_commit_hash> <test_filepath> > <test_filepath>
-
-# 3. run the test
-MOZCONFIG=/data/FaultLocalizationIndustry/mozilla-central/mozconfig RUSTUP_TOOLCHAIN=stable DISPLAY=:99 \
-  ./mach wpt --headless --no-pause-after-test <test_filepath> 2>&1 | tee <bugid>_<role>_test.log
-
-# 4. if PARENT, revert the patch
-hg revert -r . <test_filepath>
-
-# 5. save the build back
-mv objdir-fullBuild /data/FaultLocalizationIndustry/saved_builds/<commit_hash>
-```
 
 For WPT crashtests specifically, replace command with:
 ```bash
