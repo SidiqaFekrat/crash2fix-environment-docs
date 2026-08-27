@@ -1,4 +1,4 @@
-# GTest — Requirements & How to Run
+# GTest — Requirements 
 
 **Official docs:** https://firefox-source-docs.mozilla.org/gtest/index.html
 
@@ -54,24 +54,6 @@ If `xul-gtest` was never linked before, `mach gtest`'s build-then-run step means
 **GTK/graphics stack** (pango, cairo, harfbuzz, fontconfig, freetype resolved together)
 ```bash
    sudo apt-get install -y libgtk-3-dev libxkbcommon-dev
-```
-
-## How to Run
-
-```bash
-# 1. REQUIRED for gtest specifically — full build before the targeted filter
-MOZCONFIG=/data/FaultLocalizationIndustry/mozilla-central/mozconfig RUSTUP_TOOLCHAIN=stable DISPLAY=:99 \
-  ./mach build
-
-# 2. if PARENT role, patch the test file from the fixing commit
-hg cat -r <fixing_commit_hash> <test_filepath> > <test_filepath>
-
-# 3. run the actual gtest filter — built from the test's filename stem, not full path
-#    e.g. TestTextDirective.cpp -> *TestTextDirective*
-MOZCONFIG=/data/FaultLocalizationIndustry/mozilla-central/mozconfig RUSTUP_TOOLCHAIN=stable DISPLAY=:99 \
-  ./mach gtest *<TestSuiteName>* \
-  2>&1 | tee /data/FaultLocalizationIndustry/manual_test_logs/<bugid>_<role>_gtest.log
-
 ```
 
 ## Troubleshooting
