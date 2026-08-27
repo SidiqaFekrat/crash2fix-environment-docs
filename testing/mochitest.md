@@ -1,4 +1,4 @@
-# Mochitest & Mochitest-Browser - Requirements & How to Run
+# Mochitest & Mochitest-Browser - Requirements 
 
 Covers plain, chrome, and browser flavors.
 
@@ -34,32 +34,6 @@ mochitest discovers tests via a hand-maintained manifest (`mochitest.toml`/`.ini
 ```bash
 hg cat -r <fixing_commit> <test_file> > <test_file>
 hg cat -r <fixing_commit> <manifest_path> > <manifest_path>
-```
-
-## How to Run
-
-```bash
-cd /data/FaultLocalizationIndustry/mozilla-central
-
-# 1. switch commit, restore saved build
-hg update -r <commit_hash> --clean
-rm -rf objdir-fullBuild
-mv /data/FaultLocalizationIndustry/saved_builds/<commit_hash> objdir-fullBuild
-touch objdir-fullBuild/CLOBBER
-
-# 2. if PARENT role, patch the actual test file (and manifest, see above)
-hg cat -r <fixing_commit_hash> <test_filepath> > <test_filepath>
-
-# 3. run — only the real test file, never a companion script directly
-MOZCONFIG=/data/FaultLocalizationIndustry/mozilla-central/mozconfig RUSTUP_TOOLCHAIN=stable DISPLAY=:99 \
-  ./mach mochitest --headless <test_filepath> 2>&1 | tee <bugid>_<role>_test.log
-
-# 4. if PARENT, check before reverting
-hg status <test_filepath>
-# shows "M"           -> hg revert -r . <test_filepath>
-# shows "not managed" -> rm <test_filepath>
-
-mv objdir-fullBuild /data/FaultLocalizationIndustry/saved_builds/<commit_hash>
 ```
 
 ## Flavors
