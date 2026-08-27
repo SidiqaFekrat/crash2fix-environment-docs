@@ -17,18 +17,34 @@ manifest patching needed at parent commits.
 
 ## `typing_extensions` resets on every commit switch
 
-A vendored `typing_extensions.py` inside WPT's third-party tooling
-gets reset every time `hg update --clean` runs, breaking WPT's
-Python tooling until reapplied:
+wpt starts a WebTransport-over-HTTP/3 server (`aioquic`), which pulls in pyOpenSSL, which imports `from typing_extensions import deprecated` — a decorator added in typing_extensions 4.5. The copy vendored at `testing/web-platform/tests/tools/third_party/typing_extensions/src/typing_extensions.py` predates it at commits in this range, so the import fails during server startup, before any test executes.
+
+### Symptom
+
+Traceback ending in `from typing_extensions import deprecated`, inside
+`ensure_started` → `test_servers()`. `returncode 1`, roughly 100s spent
+failing to start servers, no test result produced. Classify `technical` —
+this is not a verdict on the bug.
+
+### The fix
+
+Copy the wpt venv's (newer) `typing_extensions.py` over the vendored one:
 
 ```bash
 cp $(find ~/.mozbuild/srcdirs/*/_virtualenvs/wpt -name "typing_extensions.py" -path "*/site-packages/*") \
    testing/web-platform/tests/tools/third_party/typing_extensions/src/typing_extensions.py
 ```
-Must be reapplied after **every** commit switch, not just once. For
-full pipeline automation this belongs inside the build script itself
-(right after `hg_update()`, before `mach_build()`), not as a manual
-step.
+## Why the copy doesn't stay applied — two observed failure modes
+**1. The patch is reverted on every commit switch.** The vendored file is tracked by Mercurial, so `hg update --clean` restores Mozilla's version and discards the patch. Applying it once during environment setup is not enough. Verify with:
+
+```bash
+hg status testing/web-platform/tests/tools/third_party/typing_extensions/src/typing_extensions.py
+# expect "M" — clean output means the patch is not in place
+```
+
+**2. The source of the copy may not exist yet.** `_virtualenvs/wpt/` is created lazily by mach on the first `./mach wpt` invocation. `./mach build` does not create it. On a fresh instance, or on the first wpt bug after one, `find` returns nothing and the copy silently does nothing — the test then runs against the unpatched vendored file and produces the traceback above.
+
+Observed on bug 1885702: the freshly-built fixing commit failed on this import, while the restored parent commit — run afterwards, same source directory, same venv — passed. The venv had been created in the interim.
 
 ## WPT crashtests need a different command than in-tree crashtests
 
