@@ -11,6 +11,18 @@ Because the benchmark spans Firefox commits from 2018-2026, building and testing
 
 This repository captures the dependencies, toolchain pins, and setup steps we discovered while doing this - much of it through manual, pre-failure debugging on a fresh environment, since Mozilla's own 'mach bootstrap' covers build-time dependencies but not test-runtime ones. We're sharing it in case it's useful reference material, and we'd welcome corrections or pointers to existing Mozilla resources that cover this same ground.
 
+## Repository Contents
+
+| Path | Contents |
+|---|---|
+| `ENVIRONMENT_SETUP.md` | Base system setup, toolchain pins, and shared dependencies |
+| `testing/` | Per-framework setup and run instructions, one file per test suite |
+| `data/` | Bug-level build and test-validation results, and full pipeline documentation |
+
+
+
+
+
 
 Compiled by Sidiqa Fekrat, CS Undergraduate, SABR Lab, DePaul University.
 Advisor: Dong Jae Kim.
